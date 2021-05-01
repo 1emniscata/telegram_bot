@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from auth_data import token
+import telebot
 import time
 
 
@@ -109,6 +111,30 @@ class Bot:
             self.browser.close()
             self.browser.quit()
 
+    def telegram_bot(self, token):
+        bot = telebot.TeleBot(token)
+
+        @bot.message_handler(commands=['start'])
+        def start(message):
+            msg = 'Привет! Это Telegram бот для показа лучшего курса продажи доллара в Осиповичах.'
+            bot.send_message(message.chat.id, msg)
+
+        @bot.message_handler(content_types=["text"])
+        def send_info(message):
+            if message.text.lower() == 'show':
+                try:
+                    # self.download_data()
+                    bot.send_message(message.chat.id, self.download_data())
+                except Exception as err:
+                    print(err)
+                    bot.send_message(message.chat.id, 'Что-то пошло не так')
+            else:
+                print('По-моему, ты набрала неправильную команду')
+
+
+        bot.polling()
+
 
 a = Bot()
 a.download_data()
+# a.telegram_bot(token)
