@@ -56,13 +56,13 @@ class Bot:
             '//*[@id="currency_tbody"]/tr[14]/td[1]/span/a'  # BPS
 
             all_rates = {}
-            for i in range(30):
+            for i in range(20):
                 rate = self.xpath_exists(f'//*[@id="currency_tbody"]/tr[{i}]/td[3]')
                 bank_title = self.xpath_exists(f'//*[@id="currency_tbody"]/tr[{i}]/td[1]/span/a')
                 if rate and bank_title:
                     bank = self.browser.find_element_by_xpath(
                         f'//*[@id="currency_tbody"]/tr[{i}]/td[1]/span/a').text
-                    time.sleep(7)
+                    time.sleep(6)
                     all_rates[bank] = self.browser.find_element_by_xpath(
                         f'//*[@id="currency_tbody"]/tr[{i}]/td[3]').text
             # for i in range(12):
@@ -95,9 +95,12 @@ class Bot:
             # print('Min value:', min(all_rates.values()))
             '''
 
+            message = ''
             print('Курс продажи доллара в банках города Осиповичи:')
+            message += 'Курс продажи доллара в банках города Осиповичи:\n'
             for bank in all_rates_mine:
                 print(f'{bank}: {all_rates_mine[bank]}')
+                message += f'{bank}: {all_rates_mine[bank]}\n'
 
             for bank in all_rates_mine:
                 if all_rates_mine[bank] == min(all_rates_mine.values()):
@@ -105,6 +108,8 @@ class Bot:
                     len_of_separator = len(result)
                     print('-' * len_of_separator)
                     print(result)
+                    message += '-' * len_of_separator + '\n' + result
+            return message
         except NoSuchElementException as err:
             print(err)
         finally:
@@ -114,6 +119,7 @@ class Bot:
     def telegram_bot(self, token):
         bot = telebot.TeleBot(token)
 
+        total_message = self.download_data()
         @bot.message_handler(commands=['start'])
         def start(message):
             msg = 'Привет! Это Telegram бот для показа лучшего курса продажи доллара в Осиповичах.'
@@ -124,7 +130,7 @@ class Bot:
             if message.text.lower() == 'show':
                 try:
                     # self.download_data()
-                    bot.send_message(message.chat.id, self.download_data())
+                    bot.send_message(message.chat.id, total_message)
                 except Exception as err:
                     print(err)
                     bot.send_message(message.chat.id, 'Что-то пошло не так')
@@ -136,5 +142,5 @@ class Bot:
 
 
 a = Bot()
-a.download_data()
-# a.telegram_bot(token)
+# a.download_data()
+a.telegram_bot(token)
