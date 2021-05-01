@@ -79,7 +79,7 @@ class Bot:
             # print(f'Банк с лучшим курсом продажи: {best_bank}.\nЛучший курс: {sell_rate}.')
             banks = list(all_rates.keys())
             rates = list(all_rates.values())
-            my_banks = ['Приорбанк', 'Беларусбанк', 'Белагропромбанк', 'БПС-Сбербанк']  # Only these banks is located in Osipovichi
+            my_banks = ['Приорбанк', 'Беларусбанк', 'Белагропромбанк', 'БПС-Сбербанк']  # Banks is located in Osipovichi
             all_rates_mine = {}
             for i in range(len(banks)):
                 if banks[i] in my_banks:
@@ -116,10 +116,11 @@ class Bot:
             self.browser.close()
             self.browser.quit()
 
-    def telegram_bot(self, token):
-        bot = telebot.TeleBot(token)
+    def telegram_bot(self, tg_token):
+        bot = telebot.TeleBot(tg_token)
 
         total_message = self.download_data()
+
         @bot.message_handler(commands=['start'])
         def start(message):
             msg = 'Привет! Это Telegram бот для показа лучшего курса продажи доллара в Осиповичах.'
@@ -136,7 +137,6 @@ class Bot:
                     bot.send_message(message.chat.id, 'Что-то пошло не так')
             else:
                 print('По-моему, ты набрала неправильную команду')
-
 
         bot.polling()
 
