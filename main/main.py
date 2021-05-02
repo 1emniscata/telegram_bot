@@ -23,13 +23,13 @@ class Bot:
     def download_data(self):
         try:
             self.browser.get('https://myfin.by/currency/osipovichi?sort=usd_sell.desc')
-            time.sleep(5)
+            # time.sleep(3)
             for i in range(1):
                 self.browser.execute_script('window.scroll(0, document.body.scrollHeight);')
-            time.sleep(5)
+            time.sleep(20)
             # sell_rate = self.browser.find_element_by_xpath(
             #     '//*[@id="currency_tbody"]/tr[14]/td[3]').text
-            time.sleep(15)
+            # time.sleep(15)
             # best_bank = self.browser.find_element_by_xpath(
             #     '//*[@id="currency_tbody"]/tr[14]/td[1]/span/a').text
             # '//*[@id="currency_tbody"]/tr[1]/td[1]').text
@@ -62,7 +62,7 @@ class Bot:
                 if rate and bank_title:
                     bank = self.browser.find_element_by_xpath(
                         f'//*[@id="currency_tbody"]/tr[{i}]/td[1]/span/a').text
-                    time.sleep(6)
+                    # time.sleep(6)
                     all_rates[bank] = self.browser.find_element_by_xpath(
                         f'//*[@id="currency_tbody"]/tr[{i}]/td[3]').text
             # for i in range(12):
@@ -97,7 +97,7 @@ class Bot:
 
             message = ''
             print('Курс продажи доллара в банках города Осиповичи:')
-            message += 'Курс продажи доллара в банках города Осиповичи:\n'
+            message += 'Курс продажи доллара в банках города Осиповичи:\n\n'
             for bank in all_rates_mine:
                 print(f'{bank}: {all_rates_mine[bank]}')
                 message += f'{bank}: {all_rates_mine[bank]}\n'
@@ -119,11 +119,12 @@ class Bot:
     def telegram_bot(self, tg_token):
         bot = telebot.TeleBot(tg_token)
 
-        total_message = self.download_data()
+        # total_message = self.download_data()
 
         @bot.message_handler(commands=['start'])
         def start(message):
-            msg = 'Привет! Это Telegram бот для показа лучшего курса продажи доллара в Осиповичах.'
+            msg = 'Привет! Это Telegram бот для показа лучшего курса продажи банком доллара в Осиповичах. ' \
+                  'Для его показа наберите команду "show".'
             bot.send_message(message.chat.id, msg)
 
         @bot.message_handler(content_types=["text"])
@@ -131,12 +132,15 @@ class Bot:
             if message.text.lower() == 'show':
                 try:
                     # self.download_data()
-                    bot.send_message(message.chat.id, total_message)
+                    bot.send_message(message.chat.id, 'Пожалуйста, подождите порядка 15 секунд')
+                    bot.send_message(message.chat.id, self.download_data())
+
                 except Exception as err:
                     print(err)
                     bot.send_message(message.chat.id, 'Что-то пошло не так')
             else:
-                print('По-моему, ты набрала неправильную команду')
+                bot.send_message(message.chat.id, 'По-моему, Вы набрали неправильную команду')
+                print('По-моему, Вы набрали неправильную команду')
 
         bot.polling()
 
