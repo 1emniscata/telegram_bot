@@ -3,6 +3,13 @@ from selenium.common.exceptions import NoSuchElementException
 from auth_data import token
 import telebot
 import time
+import sqlite3
+
+# connection = sqlite3.connect('/home/alex/telegram_bot/my_db')
+# cursor = connection.cursor()
+# cursor.execute("create table if not exists bot (id int auto_increment, user_id int);")
+# connection.commit()
+# print('Database created')
 
 
 class Bot:
@@ -119,6 +126,8 @@ class Bot:
     def telegram_bot(self, tg_token):
         bot = telebot.TeleBot(tg_token)
 
+
+
         # total_message = self.download_data()
 
         @bot.message_handler(commands=['start'])
@@ -126,6 +135,16 @@ class Bot:
             msg = 'Привет! Это Telegram бот для показа лучшего курса продажи банком доллара в Осиповичах. ' \
                   'Для его показа наберите команду "show".'
             bot.send_message(message.chat.id, msg)
+
+            connection = sqlite3.connect('/home/alex/telegram_bot/my_db')
+            cursor = connection.cursor()
+            cursor.execute("create table if not exists bot (id int auto_increment, user_id int);")
+            connection.commit()
+            print('Database created')
+
+            user_id = message.chat.id
+            cursor.execute(f"insert into bot (user_id) values('{user_id}');")
+            connection.commit()
 
         @bot.message_handler(content_types=["text"])
         def send_info(message):
